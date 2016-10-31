@@ -10,13 +10,15 @@ using DG.Tweening;
 public class Star : MonoBehaviour
 {
 	public AudioClip Sound;
-	public Color Color;
+	private Color Color;
 	public GameObject ExpansiveSpherePrefab;
 	private int linkedStars = 0;
 	private Vector3 originalScale;
 	public float ConstellationCreationRadius = 10f;
 
 	private LineRenderer lr;
+
+	public StarSpawner.StarType StarType;
 
 	public bool useMethod1 = false;
 
@@ -32,14 +34,9 @@ public class Star : MonoBehaviour
 		transform.DOScale(originalScale * 0.5f, 1f).SetLoops(-1, LoopType.Yoyo).SetDelay(Random.Range(0.0f, 5.0f));
 	}
 
-	// Update is called once per frame
-	void Update ()
-	{
-	}
-
 	public void Activate()
-	{		
-		Sound = AudioManager.Instance.GetNote();
+	{
+		Sound = AudioManager.Instance.GetNote(StarType);
 		CreateConstellation(ConstellationCreationRadius);
 		GetComponent<AudioSource>().PlayOneShot(Sound);
 		//GetComponent<Renderer>().material.DOColor(Color.red, 1f);
@@ -55,7 +52,7 @@ public class Star : MonoBehaviour
 		if (useMethod1)
 		{
 			Star ClosestStar = GetClosestStar(radius);
-			if(ClosestStar != null) StartCoroutine(CreateConstellationSeq(ClosestStar));
+			if (ClosestStar != null) StartCoroutine(CreateConstellationSeq(ClosestStar));
 			//if(ClosestStar != null && linkedStars == 0) StartCoroutine(CreateConstellationSeq(ClosestStar));
 		}
 		else
@@ -118,6 +115,7 @@ public class Star : MonoBehaviour
 		}
 
 		s.PreviousStar = this;
+		s.MutateToType(StarType);
 		s.Activate();
 
 
@@ -131,6 +129,8 @@ public class Star : MonoBehaviour
 	{
 		GameObject s = Instantiate(ExpansiveSpherePrefab, position, Quaternion.identity) as GameObject;
 		s.transform.DOScale(radius * 2, 1f);
+		Color oColor = s.GetComponent<Renderer>().material.color;
+		s.GetComponent<Renderer>().material.color = new Color(Color.r, Color.g, Color.b, oColor.a);
 		s.GetComponent<Renderer>().material.DOFade(0, 1f);
 		yield return new WaitForSeconds(1f);
 		Destroy(s);
@@ -160,19 +160,19 @@ public class Star : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Gets closest star to this one by getting all stars in a given radius by closeness. 
+	/// Gets closest star to this one by getting all stars in a given radius by closeness.
 	/// </summary>
 	private Star GetClosestStar(float radius)
 	{
 		List<Star> closestStars = GetClosestStars(radius);
-		if(closestStars.Count <= 1) return null; // No stars found in given radius
+		if (closestStars.Count <= 1) return null; // No stars found in given radius
 
 		int i = 1;
-		while(i < closestStars.Count && closestStars[i] == PreviousStar) // Closest star must not be equal to previous star
+		while (i < closestStars.Count && closestStars[i] == PreviousStar) // Closest star must not be equal to previous star
 		{
 			i++;
 		}
-		if(i < closestStars.Count)
+		if (i < closestStars.Count)
 			return closestStars[i];
 		else
 			return null;
@@ -211,6 +211,28 @@ public class Star : MonoBehaviour
 
 		StartCoroutine(ConstellationEffect(5f, temp));
 		print("Finished");
+	}
+
+	public void MutateToType(StarSpawner.StarType type)
+	{
+		StarType = type;
+		switch (type)
+		{
+		case StarSpawner.StarType.Melody:
+			// White dwarf
+			Color = StarSpawner.Instance.MelodyStarColor;
+			break;
+		case StarSpawner.StarType.Bass:
+			// Red dwarf
+			Color = StarSpawner.Instance.BassStarColor;
+			break;
+		case StarSpawner.StarType.Harmony:
+			// Blue dwarf
+			Color = StarSpawner.Instance.HarmonyStarColor;
+			break;
+		}
+
+		GetComponent<Renderer>().material.DOColor(Color, 1f);
 	}
 
 	public Star PreviousStar { get; set; }
