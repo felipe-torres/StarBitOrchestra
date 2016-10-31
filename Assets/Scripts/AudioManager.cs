@@ -16,6 +16,11 @@ public class AudioManager : MonoBehaviour
 	public AudioClip[] CmClips;
 	public AudioClip[] BbmClips;
 
+	public AudioClip[] Fm_HClips;
+	public AudioClip[] Cm_HClips;
+	public AudioClip[] Bbm_HClips;
+
+
 	void Awake()
 	{
 		Instance = this;
@@ -33,19 +38,40 @@ public class AudioManager : MonoBehaviour
 
 	}
 
-	public AudioClip GetNote()
+	public AudioClip GetNote(StarSpawner.StarType noteType)
 	{
 		AudioClip[] CurrentKeyNotes;
 		switch (CurrentKey)
 		{
 		case Key.Fm:
-			CurrentKeyNotes = FmClips;
+			if(noteType == StarSpawner.StarType.Melody)
+				CurrentKeyNotes = FmClips;
+			else if(noteType == StarSpawner.StarType.Bass)
+				CurrentKeyNotes = FmClips;
+			else if(noteType == StarSpawner.StarType.Harmony)
+				CurrentKeyNotes = Fm_HClips;
+			else
+				CurrentKeyNotes = FmClips;
 			break;
 		case Key.Cm:
-			CurrentKeyNotes = CmClips;
+			if(noteType == StarSpawner.StarType.Melody)
+				CurrentKeyNotes = CmClips;
+			else if(noteType == StarSpawner.StarType.Bass)
+				CurrentKeyNotes = CmClips;
+			else if(noteType == StarSpawner.StarType.Harmony)
+				CurrentKeyNotes = Cm_HClips;
+			else
+				CurrentKeyNotes = CmClips;
 			break;
 		case Key.Bbm:
-			CurrentKeyNotes = BbmClips;
+			if(noteType == StarSpawner.StarType.Melody)
+				CurrentKeyNotes = BbmClips;
+			else if(noteType == StarSpawner.StarType.Bass)
+				CurrentKeyNotes = BbmClips;
+			else if(noteType == StarSpawner.StarType.Harmony)
+				CurrentKeyNotes = Bbm_HClips;
+			else
+				CurrentKeyNotes = BbmClips;
 			break;
 		default:
 			CurrentKeyNotes = FmClips;
